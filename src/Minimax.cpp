@@ -17,9 +17,9 @@ Move Minimax::getOptimalMove(GameState& gameState) {
 
     for (const Move& move : gameState.possibleMoves()) {
         gameState.apply(move);
-        int score = minimax(gameState, mComplexity);
+        int score = minimax(gameState, mComplexity, INT_MIN, INT_MAX);
 
-        if (isMaximizing && score > bestScore || !isMaximizing && score < bestScore) {
+        if ((isMaximizing && score > bestScore) || (!isMaximizing && score < bestScore)) {
             bestScore = score;
             bestMove = move;
         }
@@ -30,34 +30,30 @@ Move Minimax::getOptimalMove(GameState& gameState) {
     return bestMove;
 }
 
-int Minimax::minimax(GameState& gameState, int depth) {
+int Minimax::minimax(GameState& gameState, int depth, int alpha, int beta) {
     if (depth == 0) {
         return heuristic(gameState);
     }
 
     bool isMaximizing = gameState.currentMoveColor() == Color::White;
 
-    int bestScore;
-    if (isMaximizing) {
-        bestScore = INT_MIN;
-    } else {
-        bestScore = INT_MAX;
-    }
-
     for (const Move& move : gameState.possibleMoves()) {
         gameState.apply(move);
-        int score = minimax(gameState, depth - 1);
-        if (isMaximizing) {
-            bestScore = std::max(bestScore, score);
-        } else {
-            bestScore = std::min(bestScore, score);
-        }
+        int score = minimax(gameState, depth - 1, alpha, beta);
         gameState.rollback(move);
+
+        if (isMaximizing) {
+            alpha = std::max(alpha, score);
+        } else {
+            beta = std::min(beta, score);
+        }
+
+        if (alpha >= beta) {
+            break;
+        }
     }
 
-    qDebug() << depth << ' ' <<  bestScore;
-
-    return bestScore;
+    return isMaximizing ? alpha : beta;
 }
 
 int Minimax::heuristic(GameState& gameState) {

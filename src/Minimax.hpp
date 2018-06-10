@@ -15,7 +15,7 @@ public slots:
     void setComplexity(int complexity);
 
 private:
-    int minimax(GameState& gameState, int depth);
+    int minimax(GameState& gameState, int depth, int alpha, int beta);
     int heuristic(GameState& gameState);
 };
 
